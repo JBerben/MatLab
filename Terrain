@@ -1,0 +1,92 @@
+% Terrain.m is a script that generates terrain using the fractional
+% brownian motion algorithm. 
+% It uses the Noise function to generate a 2D array of
+% heightmap values. These heightmap values are drawn in 3D using the
+% surf function, and appropiate colours are added to the terrain with
+% the custom colormap created within the script.
+%
+% When viewing the plot, the viewer is given the impression that they
+% are viewing and procedural terrain generation that scrolls infinitely.
+% This is not the case. A large heightmap is pre-generated, and is
+% scrolled through in a circle like motion.
+%
+% Author: Josh Berben
+
+% This clears up all variables and console windows
+close all;
+clearvars;
+
+% This is where the custom colour map is created
+
+% These are the different RGB values that make up each colour
+colours = [2, 11, 83  % darkest blue
+     3, 38, 143       % dark blue
+     31, 65, 166      % lighter blue
+     99, 133, 235     % light blue
+     232, 240, 187    % white sand
+     176, 212, 136    % plains green
+     74, 122, 57      % medium mountains
+     220, 242, 221    % high mountains
+     255, 255, 255    % mountain tops
+     
+     ]./255;
+
+% These are the heights that they occur at
+heightValues = [0
+     30
+     45
+     78
+     100
+     120
+     180
+     220
+     255];
+ 
+terrainColours = interp1(heightValues/255,colours,linspace(0,1,255));
+
+% The size of the pre-generated piece of terrain
+size = 2048;
+
+% The size of the smaller tiles that the script scans across
+smallSize = 256;
+
+% How many degrees the script will rotate the small chunk of terrain by
+frames = 7700;
+
+% Pre-generates the 2D array of heightmap values for the terrain
+t = Noise(size, 1);
+
+% Creates an array of all the angles that the terrain will be rotated by
+theta = linspace(0, 2*pi, frames);
+
+% Calculates the radius of rotation (the center point is in the middle
+% of the large piece of terrain)
+r = size/2 - smallSize/2;
+
+% These are arrays for the values of the corners of each small terrain
+% tile
+x1 = round(1+size/2 + r*sin(theta) - smallSize/2);
+x2 = round(size/2 + r*sin(theta) + smallSize/2);
+y1 = round(1+size/2 + r*cos(theta) - smallSize/2);
+y2 = round(size/2 + r*cos(theta) + smallSize/2);
+
+% This is the loop that rotates the view around the center of the large
+% piece of terrain. We are rotating in a circle around this point,
+% viewing small portions of the terrain
+
+for i = 1 : 1000
+    
+    % Use the custom colourmap that was created
+    colormap(terrainColours);
+    
+    % View the small section of terrain
+    landscape = surf(t(x1(i):x2(i), y1(i):y2(i)), 'EdgeColor','none','LineStyle','none','FaceLighting','phong');
+    
+    % Hides axis and labels. Looks neater
+    axis off
+    
+    % Changes the camera angle
+    view(50, 67);
+    
+    pause(0.01);
+end
