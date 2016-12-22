@@ -1,2 +1,3 @@
 # MatLab
-Matlab scripts
+
+A repository of MatLab scripts.
